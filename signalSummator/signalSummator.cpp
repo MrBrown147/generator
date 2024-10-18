@@ -1,8 +1,17 @@
 ﻿#include "signalSummator.h"
-#include "../noiseMC/noiseMC.h"
+#include "noiseMC.h"
 #include <stdexcept>
 
-void signalSummator::addSignal(signalInfo &info)
+#include <iostream>
+
+signalSummator::signalSummator(const uint32_t &sampleRate) :
+    sampleRate_(sampleRate)
+    , needNose(false)
+{
+
+}
+
+void signalSummator::addSignal(const signalInfo &info)
 {
 //    signalInfo siginf;
 //    siginf.amplitude = info.amplitude;
@@ -15,11 +24,11 @@ void signalSummator::addSignal(signalInfo &info)
     sineInfo sinInf;
     sinInf.amplitude = info.amplitude;
     sinInf.freq = info.freq;
-    sinInf.sampleRate = sampleRate;
+    sinInf.sampleRate = sampleRate_;
 
     sineOscillator sinOsc(sinInf);
-    uint32_t sampleStart = info.timeStart * sampleRate;
-    uint32_t sampleFinish = info.timeFinish * sampleRate;
+    uint32_t sampleStart = static_cast<uint32_t>(info.timeStart * sampleRate_ + 0.5); //несовпадоют типы
+    uint32_t sampleFinish = info.timeFinish * sampleRate_;
 
     sinesInfo.sineOscillators.push_back(sinOsc);
     sinesInfo.samplesStart.push_back(sampleStart);
@@ -28,30 +37,38 @@ void signalSummator::addSignal(signalInfo &info)
 
 void signalSummator::turnOnNoise()
 {
-    needNose = 1;
+    needNose = true;
 }
 
 void signalSummator::turnOffNoise()
 {
-    needNose = 0;
+    needNose = false;
 }
 
 std::vector<float> signalSummator::makeSummSignalSamples(uint32_t number)
 {
     std::vector<float> summsig(number, 0);
 
-    for(uint32_t i = 0; i < sinesInfo.samplesStart.size(); i++)
+    auto sz = sinesInfo.samplesStart.size();
+    for(uint32_t i = 0; i < sz; i++)
     {
         if(sinesInfo.samplesFinish[i] > number)
-            throw std::invalid_argument("number for makeSummSignalSamples shoud be more than number for sine");
-        std::vector<float> sine;
+        {
+            std::cerr << "number for makeSummSignalSamples shoud be more than number for sine" << std::endl;
+            return std::vector<float>();
+        }
+
+        sineOscillator::sampleamps sine;
+
         //генерация синусОйды
-        sine = sinesInfo.sineOscillators[i].genSamples(sinesInfo.samplesFinish[i] - sinesInfo.samplesStart[i]);
+        auto diff = sinesInfo.samplesFinish[i] - sinesInfo.samplesStart[i];
+        sine = sinesInfo.sineOscillators[i].genSamples(diff);
 
         for(uint32_t j = 0; j < sine.size(); j++)
         {
             //добавление синусоиды в её интервал действия
-            summsig[sinesInfo.samplesStart[i] + j] += sine[j];
+            auto idx = sinesInfo.samplesStart[i] + j;
+            summsig[idx] += sine[j];
         }
     }
 

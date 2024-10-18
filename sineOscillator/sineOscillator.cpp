@@ -1,12 +1,14 @@
 ﻿#include "sineOscillator.h"
-#include <cmath>
 
-sineOscillator::sineOscillator(sineInfo &inf)
+#include <math.h>
+
+sineOscillator::sineOscillator(const sineInfo &inf)
 {
-    info.amplitude = inf.amplitude;
-    info.freq = inf.freq;
-    info.sampleRate = inf.sampleRate;
-    offset = 2 * M_PI * info.freq/ info.sampleRate;
+    // info.amplitude = inf.amplitude;
+    // info.freq = inf.freq;
+    // info.sampleRate = inf.sampleRate;
+    info = inf;
+    offset = 2 * M_PI * info.freq / info.sampleRate;
 }
 
 float sineOscillator::genSample()
@@ -16,11 +18,16 @@ float sineOscillator::genSample()
     return sample;
 }
 
-std::vector<float> sineOscillator::genSamples(uint32_t number)
+sineOscillator::sampleamps sineOscillator::genSamples(const uint32_t &number)
 {
-    std::vector<float> samples(number);
+    // std::vector<float> samples(number);
+    // for(uint32_t i = 0; i < number; i++)
+    //     samples[i] = genSample();
+
+    sampleamps samples;
+    samples.reserve(number);
     for(uint32_t i = 0; i < number; i++)
-        samples[i] = genSample();
+        samples.push_back(genSample());
 
     return samples;
 }

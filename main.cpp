@@ -1,8 +1,8 @@
 ﻿
-#include "sineOscillator/sineOscillator.h"
-#include "noiseMC/noiseMC.h"
-#include "signalSummator/signalSummator.h"
-#include "wavWriter/wavWriter.h"
+#include "sineOscillator.h"
+#include "noiseMC.h"
+#include "signalSummator.h"
+#include "wavWriter.h"
 
 #include <iostream>
 #include <vector>
@@ -10,7 +10,9 @@
 #include <fstream>
 #include <algorithm>
 
-int main()
+using wavwriter::wavWriter;
+
+int main(int argc, char**argv)
 {
     //check sine oscillator
 //    sineInfo sin1;
@@ -44,6 +46,8 @@ int main()
 
     //check signalSummator
 
+    const uint32_t sampleRate = 44100;
+
     signalInfo signal1;
     signal1.amplitude = 1;
     signal1.freq = 440;
@@ -62,7 +66,7 @@ int main()
     signal3.timeStart = 0;
     signal3.timeFinish = 10;
 
-    signalSummator sigsumm;
+    signalSummator sigsumm(sampleRate);
     sigsumm.addSignal(signal1);
     sigsumm.addSignal(signal2);
     sigsumm.addSignal(signal3);
@@ -71,14 +75,19 @@ int main()
     float signalDur = 10;
     std::vector<float> result(sampleRate*signalDur + 1);
     result = sigsumm.makeSummSignalSamples(sampleRate*signalDur);
+    if(result.empty())
+    {
+        std::cerr << "Somthimg goes really wrong!" << std::endl;
+        return -1;
+    }
 
     auto maxEl = *std::max_element(result.begin(), result.end()); //нормировка
-    for(int i = 0; i < result.size(); i++)
+    for(std::size_t i = 0; i < result.size(); i++)
         result[i] /= maxEl;
 
-    std::vector<int> wavResult;
-    wavWriter wav;
-    wavResult = wav.fromFloatToInt(result);
+    std::vector<uint16_t> wavResult;
+    wavWriter wav(sampleRate);
+    wavResult = wav.fromFloatToShInt(result);
 
     wav.writeToWav(wavResult);
 

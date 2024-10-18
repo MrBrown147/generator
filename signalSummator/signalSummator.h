@@ -1,14 +1,11 @@
 ﻿#ifndef SIGNALSUMMATOR
 #define SIGNALSUMMATOR
 
-#include <string>
 #include <cstdint>
 #include <vector>
 
-#include "../sineOscillator/sineOscillator.h"
+#include "sineOscillator.h"
 
-static uint32_t sampleRate = 44100;
-//static uint16_t duration = 5;
 
 struct signalInfo
 {
@@ -28,17 +25,17 @@ struct sinesInfo
 class signalSummator
 {
 public:
+    signalSummator(const uint32_t &sampleRate);
 
-    void addSignal(signalInfo &info);
+    void addSignal(const signalInfo &info);
     void turnOnNoise();
     void turnOffNoise();
     std::vector<float> makeSummSignalSamples(uint32_t number);
+
 private:
-    //std::vector<signalInfo> signalsInf;
-    bool needNose = 0;
+    uint32_t sampleRate_;
+    bool needNose;
     sinesInfo sinesInfo;
-
-
 };
 
 #endif
