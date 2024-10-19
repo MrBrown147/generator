@@ -4,9 +4,6 @@
 
 sineOscillator::sineOscillator(const sineInfo &inf)
 {
-    // info.amplitude = inf.amplitude;
-    // info.freq = inf.freq;
-    // info.sampleRate = inf.sampleRate;
     info = inf;
     offset = 2 * M_PI * info.freq / info.sampleRate;
 }

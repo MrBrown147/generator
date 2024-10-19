@@ -9,10 +9,10 @@
 
 struct signalInfo
 {
-    uint32_t freq = 440;
-    float amplitude = 1;
-    double timeStart = 0;
-    double timeFinish = 10;
+    uint32_t freq;
+    float amplitude;
+    double timeStart;
+    double timeFinish;
 };
 
 struct sinesInfo

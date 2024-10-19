@@ -34,7 +34,7 @@ void wavWriter::writeToWav(std::vector<uint16_t> signal)
     audioFile.open("waveform.wav", std::ios::binary);
 
     head.dataSize = signal.size() * sizeof (uint16_t);
-    head.riffSize = head.dataSize + sizeof (head) - 8;
+    head.riffSize = head.dataSize + sizeof (head) - sizeof (head.riff) - sizeof (head.riffSize);
 
     audioFile.write(reinterpret_cast<const char*>(&head), sizeof (head));
 
